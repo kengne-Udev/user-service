@@ -156,8 +156,8 @@ SIMPLE_JWT = {
     "UPDATE_LAST_LOGIN": True,
 
     "ALGORITHM": "RS256",
-    "SIGNING_KEY": get_file('../private_key.pem'),
-    "VERIFYING_KEY": get_file('../public_key.pem'),
+    "SIGNING_KEY": open('private.pem').read(),
+    "VERIFYING_KEY": open('public.pem').read(),
     "AUDIENCE": None,
     "ISSUER": None,
     "JSON_ENCODER": None,

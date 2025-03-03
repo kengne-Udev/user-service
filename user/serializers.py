@@ -95,3 +95,10 @@ class SignupSerializer(serializers.ModelSerializer):
         return data
     
 
+    def create(self, validated_data):
+        email = validated_data.get('email')
+        password = validated_data.get('password')
+        user = User.objects.create_user(email=email, password=password)
+        return user
+    
+
