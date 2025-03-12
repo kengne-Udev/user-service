@@ -1,8 +1,24 @@
+import json
 from rest_framework import generics
 from .serializers import AuthSerializer, SignupSerializer, UserSerializer
 from rest_framework.response import Response
 from rest_framework import status
 from .models import User
+from jwcrypto import jwk
+from rest_framework.views import APIView
+from django.conf import settings
+
+
+
+class JWKSView(APIView):
+
+    permission_classes = []
+    def get(self, request):
+        public_key = jwk.JWK.from_pem(settings.SIMPLE_JWT["VERIFYING_KEY"].encode('utf8'))
+        jwk_set = {
+            "keys": [json.loads(public_key.export())]
+        }
+        return Response(jwk_set)
 
 
 class AuthAPIView(generics.CreateAPIView):

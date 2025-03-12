@@ -141,12 +141,8 @@ REST_FRAMEWORK = {
     ],
 }
 
-def get_file(file_url):
-    if os.path.isfile(file_url):
-        with open(file_url) as f:
-            return f.read()
-        
-    return None
+PRIVATE_KEY = open(os.path.join(BASE_DIR, "private.pem"), 'r').read()
+PUBLIC_KEY = open(os.path.join(BASE_DIR, "public.pem"), 'r').read()
 
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=60),
@@ -156,8 +152,8 @@ SIMPLE_JWT = {
     "UPDATE_LAST_LOGIN": True,
 
     "ALGORITHM": "RS256",
-    "SIGNING_KEY": open('private.pem').read(),
-    "VERIFYING_KEY": open('public.pem').read(),
+    "SIGNING_KEY": PRIVATE_KEY,
+    "VERIFYING_KEY": PUBLIC_KEY,
     "AUDIENCE": None,
     "ISSUER": None,
     "JSON_ENCODER": None,

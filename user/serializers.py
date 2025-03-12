@@ -1,10 +1,28 @@
 from typing import Optional, Type
+from jwcrypto import jwk
 from rest_framework import serializers
 from .models import User
 from django.contrib.auth import authenticate
-from rest_framework_simplejwt.tokens import Token, RefreshToken
+from rest_framework_simplejwt.tokens import Token, RefreshToken, AccessToken
 from django.conf import settings
 from django.utils import timezone
+import jwt
+
+
+class CustomAccessToken(AccessToken):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        public_key = jwk.JWK.from_pem(settings.PUBLIC_KEY.encode('utf-8'))
+        self.payload['kid'] = public_key.key_id
+
+    @classmethod
+    def for_user(cls, user):
+        token = super().for_user(user)
+        public_key = jwk.JWK.from_pem(settings.PUBLIC_KEY.encode('utf-8'))
+        token.payload['kid'] = public_key.key_id
+        token.header['kid'] = public_key.key_id
+        return token
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -57,10 +75,13 @@ class AuthSerializer(serializers.ModelSerializer):
         # Return a user object if user found
         refresh = self.get_tokens(self.user)
 
+        public_key = jwk.JWK.from_pem(settings.PUBLIC_KEY.encode('utf-8'))
+        
+        encoded = jwt.encode(refresh.payload, settings.PRIVATE_KEY.encode('utf-8'), "RS256", {"kid": public_key["kid"]})
         data['message'] = 'Login successful'
         data['token'] = {
             "refresh": str(refresh),
-            "access": str(refresh.access_token)
+            "access": encoded # str(refresh.access_token)
         }
 
         # Remove password and email fields from validated data
